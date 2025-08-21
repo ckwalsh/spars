@@ -13,23 +13,22 @@ mod handler;
 mod response;
 mod settings;
 
+pub use handler::Handler;
 pub use handler::HandlerBuildError;
-pub use settings::Settings;
-pub use settings::SettingsFromEnvError;
+pub use response::Response;
+pub use response::StatusCode;
+pub use settings::*;
 
 #[cfg(feature = "signal-hook")]
 mod signals;
 
 #[derive(Debug, Error)]
 pub enum SparsError {
-    #[error("Could not build request handler {0}")]
-    CouldNotBuildHandler(#[from] HandlerBuildError),
+    #[error("Failed to create async listener: {0}")]
+    FailedToCreateAsyncListener(std::io::Error),
 
     #[error("Failed to create signal handler: {0}")]
     FailedToStartSignalHandler(std::io::Error),
-
-    #[error("Could not bind to port: {0}")]
-    CouldNotBind(std::io::Error),
 
     #[error("Failed to join signal handler")]
     FailedToJoinSignalHandler(Box<dyn Any + Send>),
@@ -38,23 +37,21 @@ pub enum SparsError {
     SignalHandlerFailed(std::io::Error),
 }
 
-pub fn serve(settings: Settings) -> Result<(), SparsError> {
-    let handler = Arc::new(handler::Handler::build_from_root(
-        settings.root,
-        &settings.index_file,
-        settings.fallback_path.as_deref(),
-        settings.allow_hidden,
-    )?);
+pub fn serve<L: TryInto<Async<TcpListener>, Error = std::io::Error>, H: Into<Arc<Handler>>>(
+    listener: L,
+    handler: H,
+) -> Result<(), SparsError> {
+    let listener = listener
+        .try_into()
+        .map_err(SparsError::FailedToCreateAsyncListener)?;
+    let handler = handler.into();
 
     let stop_flag = Arc::new(AtomicBool::new(false));
-
-    #[cfg(feature = "signal-hook")]
-    let signal_handler = signals::spawn_signal_handler(Arc::clone(&stop_flag), settings.addr)
-        .map_err(SparsError::FailedToStartSignalHandler)?;
-
     let ex = LocalExecutor::new();
 
-    let listener = Async::<TcpListener>::bind(settings.addr).map_err(SparsError::CouldNotBind)?;
+    #[cfg(feature = "signal-hook")]
+    let signal_handler = signals::spawn_signal_handler(Arc::clone(&stop_flag), &listener)
+        .map_err(SparsError::FailedToStartSignalHandler)?;
 
     async_io::block_on(ex.run(async {
         while !stop_flag.load(Ordering::SeqCst) {

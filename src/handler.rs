@@ -12,6 +12,9 @@ use zerotrie::ZeroTrieBuildError;
 use zerotrie::ZeroTrieSimpleAscii;
 
 use crate::response::Response;
+use crate::response::StatusCode;
+use crate::settings::ExposeHiddenFiles;
+use crate::settings::HandlerSettings;
 
 mod mime;
 pub struct Handler {
@@ -58,7 +61,7 @@ impl Handler {
         mut root: PathBuf,
         index_file: &str,
         fallback_path: Option<&str>,
-        allow_hidden: bool,
+        expose_hidden: ExposeHiddenFiles,
     ) -> Result<Self, HandlerBuildError> {
         let mut file_data: Vec<HandlerFileData> = Vec::new();
         let mut mime_types: Vec<&'static str> = Vec::new();
@@ -108,8 +111,16 @@ impl Handler {
                     return Err(HandlerBuildError::NonUtf8Component(file_name));
                 };
 
-                if http_name.starts_with('.') && !allow_hidden {
-                    continue;
+                if http_name.starts_with('.') {
+                    match expose_hidden {
+                        ExposeHiddenFiles::OnlyWellKnown => {
+                            if !http_prefix.is_empty() || http_name != ".well-known" {
+                                continue;
+                            }
+                        }
+                        ExposeHiddenFiles::Hide => continue,
+                        ExposeHiddenFiles::Expose => (),
+                    }
                 }
 
                 let http_path = format_compact!("{http_prefix}/{http_name}");
@@ -176,16 +187,16 @@ impl Handler {
         })
     }
 
-    pub fn handle(&self, request: &httparse::Request) -> Result<Response, Response> {
-        let send_body = match request.method {
+    pub fn handle(&self, method: Option<&str>, path: Option<&str>) -> Result<Response, Response> {
+        let send_body = match method {
             Some("HEAD") => false,
             Some("GET") => true,
             Some(_) | None => {
-                return Ok(Response::StatusStr("405 Method Not Allowed"));
+                return Ok(Response::StatusStr(StatusCode::METHOD_NOT_ALLOWED));
             }
         };
 
-        let (path, query_sep, query) = match request.path {
+        let (path, query_sep, query) = match path {
             Some(path) => {
                 if let Some((path, query)) = path.split_once('?') {
                     (path, "?", query)
@@ -194,7 +205,7 @@ impl Handler {
                 }
             }
             None => {
-                return Ok(Response::StatusStr("400 Bad Request"));
+                return Ok(Response::StatusStr(StatusCode::BAD_REQUEST));
             }
         };
 
@@ -206,7 +217,7 @@ impl Handler {
         let path_data = match self.path_data.get(path_idx) {
             Some(data) => data,
             None => {
-                return Ok(Response::StatusStr("500 Internal Server Error"));
+                return Ok(Response::StatusStr(StatusCode::INTERNAL_SERVER_ERROR));
             }
         };
 
@@ -219,7 +230,7 @@ impl Handler {
                 let len = path.len() + query_sep.len() + query.len();
 
                 if len > 256 {
-                    return Ok(Response::StatusStr("414 URI Too Long"));
+                    return Ok(Response::StatusStr(StatusCode::URI_TOO_LONG));
                 } else {
                     return Ok(Response::Redirect {
                         path: Arc::clone(path),
@@ -242,5 +253,18 @@ impl Handler {
             len: file_data.len,
             mime_type,
         })
+    }
+}
+
+impl TryFrom<HandlerSettings> for Handler {
+    type Error = HandlerBuildError;
+
+    fn try_from(settings: HandlerSettings) -> Result<Self, Self::Error> {
+        Self::build_from_root(
+            settings.root,
+            settings.index_file.as_str(),
+            settings.fallback_path.as_deref(),
+            settings.expose_hidden,
+        )
     }
 }

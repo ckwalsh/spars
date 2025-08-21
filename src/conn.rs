@@ -19,6 +19,7 @@ use futures_lite::FutureExt as _;
 use crate::handler::Handler;
 use crate::response::Response;
 use crate::response::Responses;
+use crate::response::StatusCode;
 
 const REQUEST_BUF_CAP: usize = 1024;
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(5);
@@ -28,7 +29,6 @@ struct ConnData {
     conn: Async<TcpStream>,
     request_buf: [u8; REQUEST_BUF_CAP],
     responses: Responses,
-    response_buf: Vec<u8>,
 }
 
 pub async fn handle_conn(
@@ -41,7 +41,6 @@ pub async fn handle_conn(
         conn,
         request_buf: [0; _],
         responses: Responses::new(),
-        response_buf: Vec::new(),
     }));
 
     let mut request_buf_len: usize = 0;
@@ -54,9 +53,9 @@ pub async fn handle_conn(
 
     'conn: while !stop_flag.load(Ordering::SeqCst) {
         if request_buf_len == shared.request_buf.len() {
-            shared
-                .responses
-                .push(Response::StatusStr("431 Request Header Fields Too Large"));
+            shared.responses.push(Response::StatusStr(
+                StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE,
+            ));
             break;
         }
 
@@ -73,18 +72,13 @@ pub async fn handle_conn(
 
         request_buf_len += match read_result {
             Ok(0) => {
-                if request_buf_len > 0 {
-                    shared
-                        .responses
-                        .push(Response::StatusStr("400 Bad Request"));
-                }
                 break 'conn;
             }
             Ok(bytes_read) => bytes_read,
             Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => {
                 shared
                     .responses
-                    .push(Response::StatusStr("408 Request Timeout"));
+                    .push(Response::StatusStr(StatusCode::REQUEST_TIMEOUT));
                 break 'conn;
             }
             Err(_e) => {
@@ -94,7 +88,7 @@ pub async fn handle_conn(
                         // eprintln!("Read Error: {}", _e);
                         shared
                             .responses
-                            .push(Response::StatusStr("500 Internal Server Error"));
+                            .push(Response::StatusStr(StatusCode::INTERNAL_SERVER_ERROR));
                     }
                 }
                 break;
@@ -119,7 +113,7 @@ pub async fn handle_conn(
                         Some(_) | None => {
                             shared
                                 .responses
-                                .push(Response::StatusStr("505 HTTP Version Not Supported"));
+                                .push(Response::StatusStr(StatusCode::HTTP_VERSION_NOT_SUPPORTED));
                             break 'conn;
                         }
                     };
@@ -131,18 +125,18 @@ pub async fn handle_conn(
                             if h.value != b"0" {
                                 shared
                                     .responses
-                                    .push(Response::StatusStr("413 Content Too Large"));
+                                    .push(Response::StatusStr(StatusCode::PAYLOAD_TOO_LARGE));
                                 break 'conn;
                             }
                         } else if h.name.eq_ignore_ascii_case("transfer-encoding") {
                             shared
                                 .responses
-                                .push(Response::StatusStr("501 Not Implemented"));
+                                .push(Response::StatusStr(StatusCode::NOT_IMPLEMENTED));
                             break 'conn;
                         }
                     }
 
-                    let response = match shared.handler.handle(&request) {
+                    let response = match shared.handler.handle(request.method, request.path) {
                         Ok(response) => response,
                         Err(response) => {
                             keep_alive = false;
@@ -159,7 +153,7 @@ pub async fn handle_conn(
                 Err(_) => {
                     shared
                         .responses
-                        .push(Response::StatusStr("400 Bad Request"));
+                        .push(Response::StatusStr(StatusCode::BAD_REQUEST));
                     bytes_consumed = request_buf_len;
                     break 'conn;
                 }
@@ -183,11 +177,11 @@ pub async fn handle_conn(
                 move || {
                     let mut guard = shared_arc.lock().unwrap();
                     let shared = guard.deref_mut();
-                    // SAFETY: TcpStream is IoSafe, andpinky promise to not destroy the connection
+                    // SAFETY: TcpStream is IoSafe, and I pinky promise to not destroy the connection
                     let sync_conn = unsafe { shared.conn.get_mut() };
 
                     for response in shared.responses.drain() {
-                        response.write_to(sync_conn, &mut shared.response_buf, true)?;
+                        response.write_to(sync_conn, true)?;
                         sync_conn.flush()?;
                     }
 
@@ -210,7 +204,7 @@ pub async fn handle_conn(
     if bytes_consumed != request_buf_len {
         shared
             .responses
-            .push(Response::StatusStr("400 Bad Request"));
+            .push(Response::StatusStr(StatusCode::BAD_REQUEST));
     }
 
     if let Some(last_response) = shared.responses.pop() {
@@ -222,17 +216,17 @@ pub async fn handle_conn(
             move || {
                 let mut guard = shared_arc.lock().unwrap();
                 let shared = guard.deref_mut();
-                // SAFETY: TcpStream is IoSafe, andpinky promise to not destroy the connection
+                // SAFETY: TcpStream is IoSafe, and I pinky promise to not destroy the connection
                 let sync_conn = unsafe { shared.conn.get_mut() };
 
                 sync_conn.shutdown(Shutdown::Read)?;
 
                 for response in shared.responses.drain() {
-                    response.write_to(sync_conn, &mut shared.response_buf, true)?;
+                    response.write_to(sync_conn, true)?;
                     sync_conn.flush()?;
                 }
 
-                last_response.write_to(sync_conn, &mut shared.response_buf, false)?;
+                last_response.write_to(sync_conn, false)?;
                 sync_conn.flush()?;
 
                 sync_conn.shutdown(Shutdown::Write)
@@ -257,7 +251,7 @@ pub async fn handle_conn(
             move || {
                 let mut guard = shared_arc.lock().unwrap();
                 let shared = guard.deref_mut();
-                // SAFETY: TcpStream is IoSafe, andpinky promise to not destroy the connection
+                // SAFETY: TcpStream is IoSafe, and I pinky promise to not destroy the connection
                 let sync_conn = unsafe { shared.conn.get_mut() };
 
                 sync_conn.shutdown(Shutdown::Both)

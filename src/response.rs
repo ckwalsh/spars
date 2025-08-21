@@ -1,10 +1,54 @@
+use std::fmt::Display;
 use std::fs::File;
 use std::io::Write as _;
 use std::net::TcpStream;
 use std::path::Path;
 use std::sync::Arc;
 
+use arrayvec::ArrayVec;
 use compact_str::CompactString;
+
+#[allow(non_camel_case_types)]
+#[derive(Debug)]
+pub enum StatusCode {
+    BAD_REQUEST,                     // 400
+    METHOD_NOT_ALLOWED,              // 405
+    REQUEST_TIMEOUT,                 // 408
+    PAYLOAD_TOO_LARGE,               // 413
+    URI_TOO_LONG,                    // 414
+    REQUEST_HEADER_FIELDS_TOO_LARGE, // 431
+    INTERNAL_SERVER_ERROR,           // 500
+    NOT_IMPLEMENTED,                 // 501
+    HTTP_VERSION_NOT_SUPPORTED,      // 505
+}
+
+const STATUS_STRS: [&str; 9] = [
+    "400 Bad Request",
+    "405 Method Not Allowed",
+    "408 Request Timeout",
+    "413 Content Too Large",
+    "414 URI Too Long",
+    "431 Request Header Fields Too Large",
+    "500 Internal Server Error",
+    "501 Not Implemented",
+    "505 HTTP Version Not Supported",
+];
+
+impl Display for StatusCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            StatusCode::BAD_REQUEST => STATUS_STRS[0],
+            StatusCode::METHOD_NOT_ALLOWED => STATUS_STRS[1],
+            StatusCode::REQUEST_TIMEOUT => STATUS_STRS[2],
+            StatusCode::PAYLOAD_TOO_LARGE => STATUS_STRS[3],
+            StatusCode::URI_TOO_LONG => STATUS_STRS[4],
+            StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE => STATUS_STRS[5],
+            StatusCode::INTERNAL_SERVER_ERROR => STATUS_STRS[6],
+            StatusCode::NOT_IMPLEMENTED => STATUS_STRS[7],
+            StatusCode::HTTP_VERSION_NOT_SUPPORTED => STATUS_STRS[8],
+        })
+    }
+}
 
 #[derive(Debug)]
 pub enum Response {
@@ -18,18 +62,12 @@ pub enum Response {
         query: CompactString,
     },
     NotFound,
-    StatusStr(&'static str),
+    StatusStr(StatusCode),
 }
 
 impl Response {
-    pub fn write_to(
-        self,
-        conn: &mut TcpStream,
-        buf: &mut Vec<u8>,
-        keep_alive: bool,
-    ) -> std::io::Result<()> {
-        buf.clear();
-
+    pub fn write_to(self, conn: &mut TcpStream, keep_alive: bool) -> std::io::Result<()> {
+        let mut buf = ArrayVec::<u8, 256>::new();
         let mut body_path = None;
 
         match self {
@@ -38,9 +76,6 @@ impl Response {
                 len,
                 mime_type,
             } => {
-                // 77 + len + mime_type
-                buf.reserve(128);
-
                 write!(buf, "HTTP/1.1 200 OK\r\n")?; // 17
                 write!(buf, "Content-Length: {len}\r\n")?; // 18 + len
 
@@ -53,24 +88,15 @@ impl Response {
                 }
             }
             Response::Redirect { path, query } => {
-                // 77 + path + query
-                buf.reserve(256);
-
                 write!(buf, "HTTP/1.1 302 Found\r\n")?; // 20
                 write!(buf, "Content-Length: 0\r\n")?; // 19
                 write!(buf, "Location: {path}{query}\r\n")?; // 12 + path + query
             }
             Response::NotFound => {
-                // 69
-                buf.reserve(128);
-
                 write!(buf, "HTTP/1.1 404 Not Found\r\n")?; // 24
                 write!(buf, "Content-Length: 0\r\n")?; // 19
             }
             Response::StatusStr(status) => {
-                // 56 + status
-                buf.reserve(128);
-
                 write!(buf, "HTTP/1.1 {status}\r\n")?; // 11 + status
                 write!(buf, "Content-Length: 0\r\n")?; // 19
             }
