@@ -14,7 +14,7 @@ panic = "abort"
 codegen-units = 1
 
 [features]
-default = ["signal-hook"]
+default = []
 mime_guess = ["dep:mime_guess"]
 signal-hook = ["dep:signal-hook"]
 

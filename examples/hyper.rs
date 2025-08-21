@@ -133,18 +133,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // We create a TcpListener and bind it to 127.0.0.1:3000
     let listener = TcpListener::bind(settings.server.addr).await?;
 
-    if let Some(p) = settings.server.port_file {
+    if let Some(p) = settings.server.addr_file {
         let addr = listener.local_addr().expect("Failed to get local address");
-        let port = addr.port();
 
         let mut f = std::fs::File::options()
             .write(true)
             .create(true)
             .truncate(true)
             .open(p)
-            .expect("Failed to open port file");
+            .expect("Failed to open addr file");
 
-        write!(f, "{port}").expect("Failed to write port");
+        write!(f, "{addr}").expect("Failed to write addr");
     }
 
     // We start a loop to continuously accept incoming connections

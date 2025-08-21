@@ -35,7 +35,7 @@ echo -e '\tDocker spars:latest'
 echo ""
 echo "# Human Readable Sizes"
 
-(find . -name 'spars' -type f -executable; find . -name 'hyper' -type f -executable) | sort | xargs -n1 ls -sh --block-size=1 | sed "s/ /\t/"
+(find . -name 'spars' -type f -executable; find . -name 'hyper' -type f -executable) | sort | xargs -n1 ls -sh | sed "s/ /\t/"
 
 echo ""
 numfmt --to=iec-i --suffix=B --format="%0f" $(docker image inspect spars:hyper | jq '.[0].Size') | tr -d '\n'

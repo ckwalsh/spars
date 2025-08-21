@@ -7,7 +7,7 @@ use std::str::FromStr;
 pub struct ServerSettings {
     pub addr: SocketAddr,
     pub pid_file: Option<PathBuf>,
-    pub port_file: Option<PathBuf>,
+    pub addr_file: Option<PathBuf>,
 }
 
 impl Default for ServerSettings {
@@ -15,7 +15,7 @@ impl Default for ServerSettings {
         Self {
             addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 3000),
             pid_file: None,
-            port_file: None,
+            addr_file: None,
         }
     }
 }
@@ -39,19 +39,11 @@ impl ServerSettings {
         }
 
         if let Some(s) = super::env("PID_FILE")? {
-            settings.pid_file = Some(
-                PathBuf::from(s)
-                    .canonicalize()
-                    .map_err(super::SettingsFromEnvError::BadFilePath)?,
-            );
+            settings.pid_file = Some(PathBuf::from(s));
         }
 
-        if let Some(s) = super::env("PORT_FILE")? {
-            settings.port_file = Some(
-                PathBuf::from(s)
-                    .canonicalize()
-                    .map_err(super::SettingsFromEnvError::BadFilePath)?,
-            );
+        if let Some(s) = super::env("ADDR_FILE")? {
+            settings.addr_file = Some(PathBuf::from(s));
         }
 
         Ok(settings)
