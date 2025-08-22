@@ -6,18 +6,18 @@ use std::io::Write as _;
 use std::sync::Arc;
 
 use futures_lite::FutureExt;
-use futures_util::future::BoxFuture;
 use futures_util::TryStreamExt as _;
-use http_body_util::combinators::BoxBody;
+use futures_util::future::BoxFuture;
 use http_body_util::Either;
 use http_body_util::Empty;
 use http_body_util::StreamBody;
-use hyper::body::Bytes;
-use hyper::server::conn::http1;
-use hyper::service::Service;
+use http_body_util::combinators::BoxBody;
 use hyper::Request;
 use hyper::Response;
 use hyper::StatusCode;
+use hyper::body::Bytes;
+use hyper::server::conn::http1;
+use hyper::service::Service;
 use hyper_util::rt::TokioIo;
 use spars_httpd::Handler;
 use spars_httpd::Settings;
@@ -86,7 +86,9 @@ impl Service<Request<hyper::body::Incoming>> for Svc {
                 spars_httpd::Response::StatusStr(status_code) => {
                     let status = match status_code {
                         spars_httpd::StatusCode::BAD_REQUEST => StatusCode::BAD_REQUEST,
-                        spars_httpd::StatusCode::METHOD_NOT_ALLOWED => StatusCode::METHOD_NOT_ALLOWED,
+                        spars_httpd::StatusCode::METHOD_NOT_ALLOWED => {
+                            StatusCode::METHOD_NOT_ALLOWED
+                        }
                         spars_httpd::StatusCode::REQUEST_TIMEOUT => StatusCode::REQUEST_TIMEOUT,
                         spars_httpd::StatusCode::PAYLOAD_TOO_LARGE => StatusCode::PAYLOAD_TOO_LARGE,
                         spars_httpd::StatusCode::URI_TOO_LONG => StatusCode::URI_TOO_LONG,

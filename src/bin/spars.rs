@@ -7,9 +7,9 @@ use std::io::Write as _;
 use std::net::TcpListener;
 use std::sync::Arc;
 
-use spars_httpd::serve;
 use spars_httpd::Handler;
 use spars_httpd::Settings;
+use spars_httpd::serve;
 
 fn main() {
     let settings = Settings::from_env().expect("Invalid Settings");

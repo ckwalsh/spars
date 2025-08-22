@@ -28,11 +28,7 @@ impl From<&str> for ExposeHiddenFiles {
         } else if s.eq_ignore_ascii_case("wellknown") {
             Self::OnlyWellKnown
         } else if let Ok(expose) = bool::from_str(s) {
-            if expose {
-                Self::Expose
-            } else {
-                Self::Hide
-            }
+            if expose { Self::Expose } else { Self::Hide }
         } else {
             Self::OnlyWellKnown
         }

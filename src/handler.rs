@@ -8,8 +8,8 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use compact_str::format_compact;
 use compact_str::CompactString;
+use compact_str::format_compact;
 use thiserror::Error;
 use zerotrie::ZeroTrieBuildError;
 use zerotrie::ZeroTrieSimpleAscii;

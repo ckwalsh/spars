@@ -6,14 +6,14 @@ use std::net::IpAddr;
 use std::net::Ipv4Addr;
 use std::net::SocketAddr;
 use std::net::TcpListener;
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
 
-use spars_httpd::serve_with_stop_flag;
 use spars_httpd::ExposeHiddenFiles;
 use spars_httpd::Handler;
 use spars_httpd::HandlerSettings;
+use spars_httpd::serve_with_stop_flag;
 use tempfile::TempDir;
 
 struct StopGuard {

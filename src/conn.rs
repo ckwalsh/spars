@@ -6,10 +6,10 @@ use std::mem::MaybeUninit;
 use std::net::Shutdown;
 use std::net::TcpStream;
 use std::ops::DerefMut as _;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
 use std::time::Duration;
 use std::time::Instant;
 

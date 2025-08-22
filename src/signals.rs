@@ -3,9 +3,9 @@
 
 use std::net::TcpListener;
 use std::net::TcpStream;
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
 use std::thread::JoinHandle;
 
 use async_io::Async;

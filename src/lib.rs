@@ -3,9 +3,9 @@
 
 use std::any::Any;
 use std::net::TcpListener;
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Arc;
 
 use async_executor::LocalExecutor;
 use async_io::Async;
