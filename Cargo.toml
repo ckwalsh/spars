@@ -9,8 +9,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/ckwalsh/spars"
 keywords = ["httpd"]
 categories = ["command-line-utilities", "web-programming"]
-exclude = ["/.*"]
-
+exclude = ["/.*", "/examples", "/public", "/rust-toolchain.plaid.toml"]
 
 [profile.release]
 strip = "symbols"
