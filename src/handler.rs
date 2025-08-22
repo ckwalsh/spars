@@ -92,7 +92,7 @@ impl Handler {
         }
 
         while let Some((http_prefix, dir_path)) = search.pop() {
-            for entry in std::fs::read_dir(dir_path)? {
+            'entries: for entry in std::fs::read_dir(dir_path)? {
                 let entry = entry?;
                 let original_path = entry.path();
                 let resolved_path = original_path.canonicalize()?;
@@ -116,15 +116,13 @@ impl Handler {
                 if http_name.starts_with('.') {
                     match expose_hidden {
                         ExposeHiddenFiles::OnlyWellKnown => {
-                            if (http_prefix.is_empty() && http_name == ".well-known")
-                                || http_prefix == "/.well-known/"
-                            {
+                            if http_prefix == "/" && http_name == ".well-known" {
                                 // All good
                             } else {
                                 continue;
                             }
                         }
-                        ExposeHiddenFiles::Hide => continue,
+                        ExposeHiddenFiles::Hide => continue 'entries,
                         ExposeHiddenFiles::Expose => (),
                     }
                 }
