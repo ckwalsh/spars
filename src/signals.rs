@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2025 Cullen Walsh <ckwalsh@cullenwalsh.com>
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use std::net::TcpListener;

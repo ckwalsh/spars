@@ -1,11 +1,19 @@
 [package]
 name = "spars"
-version = "0.0.0"
+version = "0.0.1"
+authors = ["Cullen Walsh <ckwalsh@cullenwalsh.com>"]
+edition = "2024"
 rust-version = "1.85.1"
-edition = "2021"
+description = "A small httpd for serving static files and SPAs"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ckwalsh/spars"
+keywords = ["httpd"]
+categories = ["command-line-utilities", "web-programming"]
+exclude = ["/.*"]
+
 
 [profile.release]
-strip = true
+strip = "symbols"
 lto = "fat"
 
 [profile.plaid]

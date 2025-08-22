@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2025 Cullen Walsh <ckwalsh@cullenwalsh.com>
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use std::io::Write as _;
@@ -42,7 +43,7 @@ pub async fn handle_conn(
     let shared_arc = Arc::new(Mutex::new(ConnData {
         handler,
         conn,
-        request_buf: [0; _],
+        request_buf: [0; REQUEST_BUF_CAP],
         responses: Responses::new(),
     }));
 
