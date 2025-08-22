@@ -32,17 +32,18 @@ for low-qps static sites. It deliberately does not implement:
 - HTTP methods beyond GET/HEAD
 - Live file updates
 - Authentication
+- Rate limiting
+- Resource exhaustion protection
+- And more!
 
-It is not expected that these features will be added to Spars unless they can be
-done without increasing binary size and/or memory usage. If you are looking to
-serve a high-QPS site, or needing any of these features, you should use a
-well-known httpd (nginx, apache, etc) instead.
+If you are looking to serve a high-QPS site, or needing any of these features,
+you should use a well known httpd server (nginx, apache, etc) instead.
 
 ## Using spars
 
 ### Installation
 
-TODO
+TODO: fill this stub
 
 ### Configuration
 
