@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+#[doc = include_str!("../README.md")]
 use std::fs::File;
 use std::io::Write as _;
 use std::net::TcpListener;

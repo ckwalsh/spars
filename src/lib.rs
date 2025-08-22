@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use std::any::Any;
 use std::net::TcpListener;
 use std::sync::atomic::AtomicBool;

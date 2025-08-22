@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::ffi::OsString;
@@ -86,7 +88,7 @@ impl Handler {
             }
 
             dirs_searched.insert(root.clone());
-            search.push(("".into(), root));
+            search.push(("/".into(), root));
         }
 
         while let Some((http_prefix, dir_path)) = search.pop() {
@@ -114,7 +116,11 @@ impl Handler {
                 if http_name.starts_with('.') {
                     match expose_hidden {
                         ExposeHiddenFiles::OnlyWellKnown => {
-                            if !http_prefix.is_empty() || http_name != ".well-known" {
+                            if http_prefix == "" && http_name == ".well-known" {
+                                // All good
+                            } else if http_prefix.starts_with("/.well-known/") {
+                                // All good
+                            } else {
                                 continue;
                             }
                         }
@@ -123,7 +129,7 @@ impl Handler {
                     }
                 }
 
-                let http_path = format_compact!("{http_prefix}/{http_name}");
+                let http_path = format_compact!("{http_prefix}{http_name}");
 
                 let file_idx = match file_index.get(&resolved_path) {
                     Some(&file_idx) => file_idx,
@@ -132,7 +138,10 @@ impl Handler {
 
                         if metadata.is_dir() {
                             dirs_searched.insert(resolved_path.clone());
-                            search.push((http_path, resolved_path));
+                            search.push((
+                                format_compact!("{http_prefix}{http_name}/"),
+                                resolved_path,
+                            ));
                             continue;
                         }
 
@@ -164,12 +173,12 @@ impl Handler {
                 entries.push((http_path, path_idx));
 
                 if http_name == index_file {
-                    let dir_path_with_slash = format_compact!("{http_prefix}/");
+                    entries.push((http_prefix.clone(), path_idx));
 
-                    entries.push((dir_path_with_slash.clone(), path_idx));
-
-                    path_data.push(HandlerPathData::DirRedirect(Arc::from(dir_path_with_slash)));
-                    entries.push((http_prefix.clone(), path_idx + 1));
+                    path_data.push(HandlerPathData::DirRedirect(Arc::from(
+                        http_prefix.as_ref(),
+                    )));
+                    entries.push((http_prefix.trim_end_matches('/').into(), path_idx + 1));
                 }
             }
         }

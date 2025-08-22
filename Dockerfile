@@ -13,6 +13,8 @@ ENV RUSTFLAGS="-Zlocation-detail=none -Zfmt-debug=none"
 
 ARG FEATURES="signal-hook"
 
+RUN touch README.md
+
 RUN cargo build \
   --profile plaid \
   --target x86_64-unknown-linux-musl \

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use std::io::Write as _;
 use std::mem::MaybeUninit;
 use std::net::Shutdown;
@@ -31,6 +33,7 @@ struct ConnData {
     responses: Responses,
 }
 
+#[allow(clippy::await_holding_lock)]
 pub async fn handle_conn(
     handler: Arc<Handler>,
     stop_flag: Arc<AtomicBool>,

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 #[cfg(not(feature = "mime_guess"))]
 mod fallback;
 #[cfg(feature = "mime_guess")]

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use std::env::VarError;
 use std::net::AddrParseError;
 use std::num::ParseIntError;
