@@ -19,8 +19,8 @@ use hyper::Request;
 use hyper::Response;
 use hyper::StatusCode;
 use hyper_util::rt::TokioIo;
-use spars::Handler;
-use spars::Settings;
+use spars_httpd::Handler;
+use spars_httpd::Settings;
 use tokio::net::TcpListener;
 use tokio_util::io::ReaderStream;
 
@@ -41,7 +41,7 @@ impl Service<Request<hyper::body::Incoming>> for Svc {
 
         async move {
             match response {
-                spars::Response::Found {
+                spars_httpd::Response::Found {
                     resolved_path,
                     len,
                     mime_type,
@@ -74,30 +74,30 @@ impl Service<Request<hyper::body::Incoming>> for Svc {
                         Ok(builder.body(Either::Left(Empty::new())).unwrap())
                     }
                 }
-                spars::Response::Redirect { path, query } => Ok(Response::builder()
+                spars_httpd::Response::Redirect { path, query } => Ok(Response::builder()
                     .status(StatusCode::FOUND)
                     .header(hyper::header::LOCATION, format!("{path}{query}"))
                     .body(Either::Left(Empty::new()))
                     .unwrap()),
-                spars::Response::NotFound => Ok(Response::builder()
+                spars_httpd::Response::NotFound => Ok(Response::builder()
                     .status(StatusCode::NOT_FOUND)
                     .body(Either::Left(Empty::new()))
                     .unwrap()),
-                spars::Response::StatusStr(status_code) => {
+                spars_httpd::Response::StatusStr(status_code) => {
                     let status = match status_code {
-                        spars::StatusCode::BAD_REQUEST => StatusCode::BAD_REQUEST,
-                        spars::StatusCode::METHOD_NOT_ALLOWED => StatusCode::METHOD_NOT_ALLOWED,
-                        spars::StatusCode::REQUEST_TIMEOUT => StatusCode::REQUEST_TIMEOUT,
-                        spars::StatusCode::PAYLOAD_TOO_LARGE => StatusCode::PAYLOAD_TOO_LARGE,
-                        spars::StatusCode::URI_TOO_LONG => StatusCode::URI_TOO_LONG,
-                        spars::StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE => {
+                        spars_httpd::StatusCode::BAD_REQUEST => StatusCode::BAD_REQUEST,
+                        spars_httpd::StatusCode::METHOD_NOT_ALLOWED => StatusCode::METHOD_NOT_ALLOWED,
+                        spars_httpd::StatusCode::REQUEST_TIMEOUT => StatusCode::REQUEST_TIMEOUT,
+                        spars_httpd::StatusCode::PAYLOAD_TOO_LARGE => StatusCode::PAYLOAD_TOO_LARGE,
+                        spars_httpd::StatusCode::URI_TOO_LONG => StatusCode::URI_TOO_LONG,
+                        spars_httpd::StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE => {
                             StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE
                         }
-                        spars::StatusCode::INTERNAL_SERVER_ERROR => {
+                        spars_httpd::StatusCode::INTERNAL_SERVER_ERROR => {
                             StatusCode::INTERNAL_SERVER_ERROR
                         }
-                        spars::StatusCode::NOT_IMPLEMENTED => StatusCode::NOT_IMPLEMENTED,
-                        spars::StatusCode::HTTP_VERSION_NOT_SUPPORTED => {
+                        spars_httpd::StatusCode::NOT_IMPLEMENTED => StatusCode::NOT_IMPLEMENTED,
+                        spars_httpd::StatusCode::HTTP_VERSION_NOT_SUPPORTED => {
                             StatusCode::HTTP_VERSION_NOT_SUPPORTED
                         }
                     };

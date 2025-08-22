@@ -1,5 +1,5 @@
 [package]
-name = "spars"
+name = "spars-httpd"
 version = "0.0.1"
 authors = ["Cullen Walsh <ckwalsh@cullenwalsh.com>"]
 edition = "2024"

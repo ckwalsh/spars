@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: 2025 Cullen Walsh <ckwalsh@cullenwalsh.com>
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str!("../../README.md")]
 use std::fs::File;
 use std::io::Write as _;
 use std::net::TcpListener;
 use std::sync::Arc;
 
-use spars::serve;
-use spars::Handler;
-use spars::Settings;
+use spars_httpd::serve;
+use spars_httpd::Handler;
+use spars_httpd::Settings;
 
 fn main() {
     let settings = Settings::from_env().expect("Invalid Settings");

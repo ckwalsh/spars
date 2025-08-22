@@ -10,10 +10,10 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
-use spars::serve_with_stop_flag;
-use spars::ExposeHiddenFiles;
-use spars::Handler;
-use spars::HandlerSettings;
+use spars_httpd::serve_with_stop_flag;
+use spars_httpd::ExposeHiddenFiles;
+use spars_httpd::Handler;
+use spars_httpd::HandlerSettings;
 use tempfile::TempDir;
 
 struct StopGuard {
