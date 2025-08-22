@@ -9,7 +9,15 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/ckwalsh/spars"
 keywords = ["httpd"]
 categories = ["command-line-utilities", "web-programming"]
-exclude = ["/.*", "/examples", "/public", "/rust-toolchain.plaid.toml"]
+include = [
+  "/src",
+  "/Cargo.lock",
+  "/Cargo.toml",
+  "/LICENSE-APACHE",
+  "/LICENSE-MIT",
+  "/README.md",
+  "/rust-toolchain.toml",
+]
 
 [profile.release]
 strip = "symbols"
