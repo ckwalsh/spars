@@ -1,0 +1,30 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_INCREMENTAL: 0
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo fmt --all --all-features --check
+      - run: cargo clippy --all-features --all-targets
+      - run: cargo build --all
+      - run: cargo build --all --features mime_guess
+      - run: cargo build --all --features signal-hook
+      - run: cargo test
+      - run: cargo test --features mime_guess
