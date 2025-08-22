@@ -9,8 +9,8 @@ for safely and securely serving static files and Single Page Applications,
 particularly within containers.
 
 Spars was written because I was annoyed at seeing so many nginx worker processes
-in the ps output of my homelab, serving random static websites. decided to use
-the opportunity to better understand http servers and the Rust language.
+in the ps output of my homelab, serving random static websites, and decided to
+use the opportunity to better understand http servers and the Rust language.
 
 ## Features
 
@@ -39,6 +39,10 @@ serve a high-QPS site, or needing any of these features, you should use a
 well-known httpd (nginx, apache, etc) instead.
 
 ## Using spars
+
+### Installation
+
+TODO
 
 ### Configuration
 
