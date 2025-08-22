@@ -6,7 +6,7 @@ particularly within containers.
 
 Spars was written because I was annoyed at seeing so many nginx worker processes
 in the ps output of my homelab, serving random static websites. decided to use
-the opportunity to better understand http implementation and Rust.
+the opportunity to better understand http servers and the Rust language.
 
 ## Features
 
@@ -137,3 +137,5 @@ This repo includes a Dockerfile for building spars. This Dockerfile:
   - `INDEX_FILE`: `index.html`
   - `FALLBACK_PATH`: `/404.html`
   - `ALLOW_HIDDEN`: `wellknown`
+
+Planned work: publish spars to DockerHub and link it here.
