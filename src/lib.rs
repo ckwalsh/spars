@@ -41,6 +41,9 @@ pub fn serve<L: TryInto<Async<TcpListener>, Error = std::io::Error>, H: Into<Arc
     listener: L,
     handler: H,
 ) -> Result<(), SparsError> {
+    let listener = listener
+        .try_into()
+        .map_err(SparsError::FailedToCreateAsyncListener)?;
     let stop_flag = Arc::new(AtomicBool::new(false));
 
     #[cfg(feature = "signal-hook")]
@@ -58,17 +61,11 @@ pub fn serve<L: TryInto<Async<TcpListener>, Error = std::io::Error>, H: Into<Arc
     Ok(())
 }
 
-pub fn serve_with_stop_flag<
-    L: TryInto<Async<TcpListener>, Error = std::io::Error>,
-    H: Into<Arc<Handler>>,
->(
-    listener: L,
+pub fn serve_with_stop_flag<H: Into<Arc<Handler>>>(
+    listener: Async<TcpListener>,
     handler: H,
     stop_flag: Arc<AtomicBool>,
 ) -> Result<(), SparsError> {
-    let listener = listener
-        .try_into()
-        .map_err(SparsError::FailedToCreateAsyncListener)?;
     let handler = handler.into();
 
     let ex = LocalExecutor::new();

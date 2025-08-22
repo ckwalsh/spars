@@ -183,6 +183,9 @@ fn test_integration_simple() -> std::io::Result<()> {
 
         s.spawn({
             let stop_flag = guard.flag();
+            let listener = listener
+                .try_into()
+                .expect("failed to create async listener");
 
             move || {
                 serve_with_stop_flag(listener, handler, stop_flag).expect("Server Failed");
