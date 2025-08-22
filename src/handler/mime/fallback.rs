@@ -7,6 +7,7 @@ fn mime_from_ext(ext: &str) -> Option<&'static str> {
         "js" => Some("text/javascript"),
         "css" => Some("text/css"),
         "json" => Some("application/json"),
+        "txt" => Some("text/plain"),
         "png" => Some("image/png"),
         "jpg" | "jpeg" => Some("image/jpeg"),
         "gif" => Some("image/gif"),

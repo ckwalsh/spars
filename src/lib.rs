@@ -41,17 +41,37 @@ pub fn serve<L: TryInto<Async<TcpListener>, Error = std::io::Error>, H: Into<Arc
     listener: L,
     handler: H,
 ) -> Result<(), SparsError> {
+    let stop_flag = Arc::new(AtomicBool::new(false));
+
+    #[cfg(feature = "signal-hook")]
+    let signal_handler = signals::spawn_signal_handler(Arc::clone(&stop_flag), &listener)
+        .map_err(SparsError::FailedToStartSignalHandler)?;
+
+    serve_with_stop_flag(listener, handler, stop_flag)?;
+
+    #[cfg(feature = "signal-hook")]
+    signal_handler
+        .join()
+        .map_err(SparsError::FailedToJoinSignalHandler)?
+        .map_err(SparsError::SignalHandlerFailed)?;
+
+    Ok(())
+}
+
+pub fn serve_with_stop_flag<
+    L: TryInto<Async<TcpListener>, Error = std::io::Error>,
+    H: Into<Arc<Handler>>,
+>(
+    listener: L,
+    handler: H,
+    stop_flag: Arc<AtomicBool>,
+) -> Result<(), SparsError> {
     let listener = listener
         .try_into()
         .map_err(SparsError::FailedToCreateAsyncListener)?;
     let handler = handler.into();
 
-    let stop_flag = Arc::new(AtomicBool::new(false));
     let ex = LocalExecutor::new();
-
-    #[cfg(feature = "signal-hook")]
-    let signal_handler = signals::spawn_signal_handler(Arc::clone(&stop_flag), &listener)
-        .map_err(SparsError::FailedToStartSignalHandler)?;
 
     async_io::block_on(ex.run(async {
         while !stop_flag.load(Ordering::SeqCst) {
@@ -71,12 +91,6 @@ pub fn serve<L: TryInto<Async<TcpListener>, Error = std::io::Error>, H: Into<Arc
             }
         }
     }));
-
-    #[cfg(feature = "signal-hook")]
-    signal_handler
-        .join()
-        .map_err(SparsError::FailedToJoinSignalHandler)?
-        .map_err(SparsError::SignalHandlerFailed)?;
 
     Ok(())
 }
