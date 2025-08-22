@@ -116,9 +116,9 @@ impl Handler {
                 if http_name.starts_with('.') {
                     match expose_hidden {
                         ExposeHiddenFiles::OnlyWellKnown => {
-                            if http_prefix == "" && http_name == ".well-known" {
-                                // All good
-                            } else if http_prefix.starts_with("/.well-known/") {
+                            if (http_prefix.is_empty() && http_name == ".well-known")
+                                || http_prefix == "/.well-known/"
+                            {
                                 // All good
                             } else {
                                 continue;
