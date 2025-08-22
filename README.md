@@ -50,12 +50,12 @@ well-known httpd (nginx, apache, etc) instead.
 | ------------------------------------------ | ------ | --------- | --------- | -------- | -------- | ---------- | ---------- |
 | Spars - [Plaid](#plaid-builds) + 8kB stack | 267.03 | 136K      | 1         | 1396 kB  | 1396 kB  | 593040 kB  | 593136 kB  |
 | Spars - Plaid + musl + 8kB stack           | 265.84 | 172K      | 1         | 328 kB   | 368 kB   | 500 kB     | 788 kB     |
-| Spars - Docker spars:latest                | -      | 98K       | 1         | ^        | ^        | ^          | ^          |
+| Spars - Docker spars:latest                | ^      | 98K       | 1         | ^        | ^        | ^          | ^          |
 | Spars - Release                            | 266.24 | 644K      | 1         | 1372 kB  | 1372 kb  | 679432 kB  | 745064 kB  |
 | Spars - Release + musl                     | 265.24 | 740K      | 1         | 796 kB   | 796 kB   | 3112 kB    | 17644 kB   |
 | Hyper - Plaid                              | 267.94 | 260K      | 1         | 2472 kB  | 2472 kB  | 1693960 kB | 1759484 kB |
 | Hyper - Plaid + musl                       | 267.43 | 304K      | 1         | 296 kB   | 620 kB   | 52412 kB   | 52764 kB   |
-| Hyper - Docker spars:examples-hyper        | -      | 148K      | 1         | -        | -        | -          | -          |
+| Hyper - Docker spars:examples-hyper        | ^      | 148K      | 1         | ^        | ^        | ^          | ^          |
 | Hyper - Release                            | 268.51 | 988k      | 1         | 2992 kB  | 2992 kb  | 1694796 kB | 1694796 kB |
 | Hyper - Release + musl                     | 267.52 | 1.1M      | 1         | 984 kB   | 1368 kB  | 51124 kB   | 51480 kB   |
 | Nginx Default Docker Config                | -      | 21M       | 32        | 49864 kB | 51764 kB | 168568 kB  | 168568 kB  |
