@@ -17,14 +17,50 @@ defaults:
     shell: bash
 
 jobs:
-  ci:
-    runs-on: ubuntu-latest
+  stable:
+    runs-on: default
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: x86_64-unknown-linux-gnu
+
+      # Lint
       - run: cargo fmt --all --check
       - run: cargo clippy --all-features --all-targets
+
+      # default features build
       - run: cargo build --all
-      - run: cargo build --all --features mime_guess
-      - run: cargo build --all --features signal-hook
       - run: cargo test
+
+      # mime_guess build
+      - run: cargo build --all --features mime_guess
       - run: cargo test --features mime_guess
+
+  plaid:
+    runs-on: default
+    needs: stable
+    env:
+      RUST_TOOLCHAIN: nightly-2025-08-18
+      RUST_TARGET: x86_64-unknown-linux-musl
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rust-src
+          targets: ${{ env.RUST_TARGET }}
+      - run:
+          cargo "+$RUST_TOOLCHAIN" build --bins --examples --profile plaid
+          --target "$RUST_TARGET" -Z build-std="std,panic_abort" -Z
+          build-std-features="optimize_for_size,panic_immediate_abort"
+
+  docker:
+    runs-on: default
+    needs: stable
+    steps:
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          push: false
