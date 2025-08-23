@@ -146,5 +146,5 @@ Planned work: publish spars to DockerHub and link it here.
 The plaid build profile uses many of the techniques from
 [johnthagen's min-sized-rust repo](https://github.com/johnthagen/min-sized-rust)
 to optimize the release build, reducing the size of the final binary. This
-results binaries that are 4x smaller and minimally faster, but makes
-debugability impossible.
+results binaries that are 4x smaller than a normal release build and minimally
+faster, but makes debugability impossible.
