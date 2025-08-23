@@ -41,9 +41,29 @@ you should use a well known httpd server (nginx, apache, etc) instead.
 
 ## Using spars
 
-### Installation
+```
+$ # Clone spars
+$ git clone https://github.com/ckwalsh/spars.git && cd spars
+[ ... ]
 
-TODO: fill this stub
+$ # Install with default (limited) mime types
+$ cargo install --locked --path .
+[ ... ]
+
+$ # Install with full mime list
+$ cargo install --locked --features mime_guess --path .
+[ ... ]
+
+$ # Run spars
+$ ROOT=/usr/local/app spars
+
+$ # Run spars with Docker
+$ docker run --rm -p 3000:3000 -v /usr/local/app:/public ckwalsh/spars:0.0.2
+
+$ # Read the index file
+$ curl http://127.0.0.1:3000/
+[ ... ]
+```
 
 ### Configuration
 
@@ -104,8 +124,6 @@ This repo includes a Dockerfile for building spars. This Dockerfile:
   - `INDEX_FILE`: `index.html`
   - `FALLBACK_PATH`: `/404.html`
   - `ALLOW_HIDDEN`: `wellknown`
-
-Planned work: publish spars to DockerHub and link it here.
 
 ## Benchmarks
 
