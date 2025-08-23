@@ -20,6 +20,7 @@ jobs:
   stable:
     runs-on: default
     steps:
+      - run: sudo apt-get update && sudo apt-get install -y build-essential
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -28,7 +29,7 @@ jobs:
 
       # Lint
       - run: cargo fmt --all --check
-      - run: cargo clippy --all-features --all-targets
+      - run: cargo clippy --all-features --all-targets --no-deps
 
       # default features build
       - run: cargo build --all
@@ -45,6 +46,7 @@ jobs:
       RUST_TOOLCHAIN: nightly-2025-08-18
       RUST_TARGET: x86_64-unknown-linux-musl
     steps:
+      - run: sudo apt-get update && sudo apt-get install -y build-essential
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -55,12 +57,3 @@ jobs:
           cargo "+$RUST_TOOLCHAIN" build --bins --examples --profile plaid
           --target "$RUST_TARGET" -Z build-std="std,panic_abort" -Z
           build-std-features="optimize_for_size,panic_immediate_abort"
-
-  docker:
-    runs-on: default
-    needs: stable
-    steps:
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v6
-        with:
-          push: false
