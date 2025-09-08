@@ -36,7 +36,7 @@ signal-hook = ["dep:signal-hook"]
 
 [dependencies]
 arrayvec = "0.7.6"
-async-executor = "1.13.2"
+async-executor = "1.13.3"
 async-io = "2.5.0"
 blocking = "1.6.2"
 compact_str = "0.9.0"
