@@ -1,6 +1,8 @@
+cargo-features = ["panic-immediate-abort"]
+
 [package]
 name = "spars-httpd"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Cullen Walsh <ckwalsh@cullenwalsh.com>"]
 edition = "2024"
 rust-version = "1.85.1"
@@ -26,7 +28,7 @@ lto = "fat"
 [profile.plaid]
 inherits = "release"
 opt-level = "z"
-panic = "abort"
+panic = "immediate-abort"
 codegen-units = 1
 
 [features]

@@ -7,7 +7,7 @@ MUSL_TARGET=x86_64-unknown-linux-musl
 cargo build --bins --examples --release
 cargo build --bins --examples --release --target "$MUSL_TARGET"
 
-PLAID_TOOLCHAIN=nightly-2025-08-18
+PLAID_TOOLCHAIN=nightly-2026-03-14
 rustup component add rust-src --toolchain "$PLAID_TOOLCHAIN"
 rustup component add rust-src --toolchain "$PLAID_TOOLCHAIN" --target "$MUSL_TARGET"
 
@@ -16,7 +16,7 @@ RUSTFLAGS="-Zlocation-detail=none -Zfmt-debug=none" \
     --bins --examples \
     --profile plaid \
     -Z build-std="std,panic_abort" \
-    -Z build-std-features="optimize_for_size,panic_immediate_abort"
+    -Z build-std-features="optimize_for_size"
 
 RUSTFLAGS="-Zlocation-detail=none -Zfmt-debug=none" \
   cargo "+$PLAID_TOOLCHAIN" build \
@@ -24,7 +24,7 @@ RUSTFLAGS="-Zlocation-detail=none -Zfmt-debug=none" \
     --profile plaid \
     --target "$MUSL_TARGET" \
     -Z build-std="std,panic_abort" \
-    -Z build-std-features="optimize_for_size,panic_immediate_abort"
+    -Z build-std-features="optimize_for_size"
 
 docker build . --tag spars:latest
 docker build . -f examples/Dockerfile.hyper --tag spars:examples-hyper

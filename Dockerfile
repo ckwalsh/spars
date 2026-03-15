@@ -19,7 +19,7 @@ RUN cargo build \
   --profile plaid \
   --target x86_64-unknown-linux-musl \
   -Z build-std="std,panic_abort" \
-  -Z build-std-features="optimize_for_size,panic_immediate_abort" \
+  -Z build-std-features="optimize_for_size" \
   --no-default-features \
   --features "$FEATURES"
 
